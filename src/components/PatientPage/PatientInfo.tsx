@@ -1,37 +1,28 @@
-import { useEffect, useState } from "react";
-import { useMatch } from "react-router-dom";
-import patients from "../../services/patients";
-import { Patient } from "../../types";
 import { Box, Card, Typography } from "@mui/material";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
 import EntryComponent from "./EntryComponent";
+import { usePatientData } from "./usePatientData";
+import { useDiagnoses } from "./useDiagnoses";
 
 function PatientInfo() {
-  const [patient, setPatient] = useState<Patient | null>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const match = useMatch("/patients/:id");
-  const patientId = match?.params.id;
-
-  useEffect(() => {
-    async function initializePatient(patientId: string | undefined) {
-      try {
-        const patient = await patients.getPatientData(patientId);
-        setPatient(patient);
-      } catch (error) {
-        setError((error as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    initializePatient(patientId);
-  }, []);
+  const { patient, isLoading, error } = usePatientData();
+  const { diagnosesArray: diagnoses } = useDiagnoses();
 
   if (isLoading) return <div>loading...</div>;
   if (error) return <div>{error}</div>;
 
-  console.log(patient.entries);
+  const codesEntries =
+    patient.entries.reduce((acc, currEntry) => {
+      if (currEntry.diagnosisCodes) {
+        acc.push(...currEntry.diagnosisCodes);
+        return acc;
+      }
+    }, []) || [];
+
+  const codesNames = codesEntries.map(
+    (code) => diagnoses.find((d) => d.code === code)?.name
+  );
 
   return (
     <>
@@ -67,7 +58,11 @@ function PatientInfo() {
               Entries
             </Typography>
             {patient.entries.map((entry) => (
-              <EntryComponent key={entry.id} entry={entry} />
+              <EntryComponent
+                key={entry.id}
+                entry={entry}
+                codesNames={codesNames}
+              />
             ))}
           </Box>
         </Card>

@@ -3,11 +3,10 @@ import { Entry } from "../../types";
 
 interface EntryProps {
   entry: Entry;
+  codesNames: Array<string>;
 }
 
-function EntryComponent({ entry }: EntryProps) {
-  console.log(entry);
-
+function EntryComponent({ entry, codesNames }: EntryProps) {
   return (
     <Box>
       <Typography sx={{ fontWeight: "bold" }}>
@@ -17,9 +16,10 @@ function EntryComponent({ entry }: EntryProps) {
         </Typography>
       </Typography>
       <List>
-        {entry.diagnosisCodes?.map((code) => (
+        {entry.diagnosisCodes?.map((code, i) => (
           <ListItem key={code}>
             <ListItemText>{code}</ListItemText>
+            <ListItemText>{codesNames.at(i)}</ListItemText>
           </ListItem>
         ))}
       </List>
