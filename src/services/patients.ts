@@ -9,11 +9,23 @@ const getAll = async () => {
   return data;
 };
 
-const getPatientData = async (patientId) => {
-  const { data } = await axios.get<Patient>(
-    `${apiBaseUrl}/patients/${patientId}`
-  );
-  return data;
+const getPatientData = async (patientId: string | undefined) => {
+  if (!patientId) {
+    throw new Error("Patient ID not provided");
+  }
+  try {
+    const { data } = await axios.get<Patient>(
+      `${apiBaseUrl}/patients/${patientId}`
+    );
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data.error;
+      throw new Error(errorMessage);
+    } else {
+      throw new Error("unknown error");
+    }
+  }
 };
 
 const create = async (object: PatientFormValues) => {
